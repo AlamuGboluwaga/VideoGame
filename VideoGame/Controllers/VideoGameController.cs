@@ -15,7 +15,9 @@ namespace VideoGame.Controllers
     {
         private readonly VideoGameDb _dbContext = dbContext;
       
-       [HttpGet("VideoGames")]
+
+      
+        [HttpGet("VideoGames")]
         public IActionResult GetAll()
         {
            var  videoGames = _dbContext.VideoGames.ToList();
@@ -44,28 +46,41 @@ namespace VideoGame.Controllers
             {
                 if (id == Guid.Empty) return BadRequest();
                 var video = await _dbContext.VideoGames.FirstOrDefaultAsync((x) => x.Id == id);
-
-                return Ok(video);
+               
+                var videoDTO = new VideoGamesDTO{
+                    Id = video.Id,
+                    Title = video.Title,
+                    Platform = video.Platform,
+                    Developer = video.Developer,
+                    Publisher = video.Publisher
+    };
+                return  video== null? NotFound("Video does not exist") :Ok(videoDTO);
             }
-            catch(Exception)
+            catch (Exception ex)
             {
-                return NoContent(Exception);
+                return StatusCode(500, new { message = "Internal error", error = ex.Message });
             }
         }
 
-
-
-
         [HttpPost]
-       public IActionResult CreateVideoGame([FromBody] VideoGames request )
+       public async Task< IActionResult> CreateVideoGame([FromBody] VideoGamesDTO request )
         {
-            request.Id = Guid.NewGuid();
-            //if (request == null) return BadRequest();
-            var video = _dbContext.VideoGames.FirstOrDefault((x)=>x.Id == request.Id);
-            //if (video == null) return NotFound("Database is Empty");
-            if (video != null) return BadRequest(new {message = "Video already exist"});
+            var  Id = Guid.NewGuid();
+            if (request == null) return BadRequest();
+            var video = await _dbContext.VideoGames.FirstOrDefaultAsync((x)=>x.Id == Id);
+            if (video == null) return NotFound("Database is Empty");
+            if (video != null) return BadRequest(new { message = "Video already exist" });
 
-            _dbContext.VideoGames.Add(request);
+            var data  = new VideoGames()
+            {
+                Id = Id,
+                Title = request.Title,
+                Platform = request.Platform,
+                Developer = request.Developer,
+                Publisher = request.Publisher
+            };
+
+            _dbContext.VideoGames.Add(data);
 
             _dbContext.SaveChanges();
 
