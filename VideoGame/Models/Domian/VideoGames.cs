@@ -1,8 +1,8 @@
-﻿namespace VideoGame
+﻿namespace VideoGame.Models.Domian
 {
-    public class VideoGame
+    public class VideoGames
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Title { get; set; }
         public string Platform { get; set; }
         public string Developer { get; set; }
