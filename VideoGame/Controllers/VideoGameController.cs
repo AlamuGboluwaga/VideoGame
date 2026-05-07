@@ -18,7 +18,7 @@ namespace VideoGame.Controllers
 
       
         [HttpGet("VideoGames")]
-        public IActionResult GetAll()
+        public IActionResult GetAllVideoGames()
         {
            var  videoGames = _dbContext.VideoGames.ToList();
 
@@ -26,7 +26,7 @@ namespace VideoGame.Controllers
 
             foreach (var videoGame in videoGames)
             {
-                videoGamesDTO.Add(new VideoGamesDTO()
+              var videoGamesModel =  new VideoGamesDTO
                 {
                     Id = videoGame.Id,
                     Title = videoGame.Title,
@@ -34,10 +34,13 @@ namespace VideoGame.Controllers
                     Developer = videoGame.Developer,
                     Publisher = videoGame.Publisher
 
-                });
+                };
+
+                videoGamesDTO.Add(videoGamesModel);
             }
             return Ok(videoGamesDTO);
         }
+
 
         [HttpGet("id")]
         public async Task<IActionResult> GetVideoBtId(Guid id)
@@ -62,18 +65,17 @@ namespace VideoGame.Controllers
             }
         }
 
+
         [HttpPost]
-       public async Task< IActionResult> CreateVideoGame([FromBody] VideoGamesDTO request )
+       public async Task< IActionResult> CreateVideoGame([FromBody] AddVideoGamesDTO request )
         {
             var  Id = Guid.NewGuid();
             if (request == null) return BadRequest();
             var video = await _dbContext.VideoGames.FirstOrDefaultAsync((x)=>x.Id == Id);
-            if (video == null) return NotFound("Database is Empty");
             if (video != null) return BadRequest(new { message = "Video already exist" });
 
-            var data  = new VideoGames()
+            var data  = new VideoGames
             {
-                Id = Id,
                 Title = request.Title,
                 Platform = request.Platform,
                 Developer = request.Developer,
@@ -84,7 +86,17 @@ namespace VideoGame.Controllers
 
             _dbContext.SaveChanges();
 
-            return Ok("Created Successfully") ;
+            var  response  = new VideoGamesDTO
+            {
+                Id = data.Id,
+                Title = data.Title,
+                Platform = data.Platform,
+                Developer = data.Developer,
+                Publisher = data.Publisher
+            };
+
+
+            return CreatedAtAction( nameof(GetVideoBtId), new { id = data.Id }, response) ;
         }
 
     }
