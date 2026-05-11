@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VideoGame.Models.Domian;
+using VideoGame.Models.Domain;
 
 namespace VideoGame.Data
 {

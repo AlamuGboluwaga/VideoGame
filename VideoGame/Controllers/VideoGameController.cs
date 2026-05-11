@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VideoGame.Data;
-using VideoGame.Models.Domian;
+using VideoGame.Models.Domain;
 using VideoGame.Models.DTOs;
 
 
@@ -18,27 +18,35 @@ namespace VideoGame.Controllers
 
       
         [HttpGet("VideoGames")]
-        public IActionResult GetAllVideoGames()
+        public async Task< IActionResult> GetAllVideoGames()
         {
-           var  videoGames = _dbContext.VideoGames.ToList();
-
-            var videoGamesDTO = new List<VideoGamesDTO>();
-
-            foreach (var videoGame in videoGames)
+            try
             {
-              var videoGamesModel =  new VideoGamesDTO
+                var videoGames = await _dbContext.VideoGames.ToListAsync();
+
+                var videoGamesDTO = new List<VideoGamesDTO>();
+
+                foreach (var videoGame in videoGames)
                 {
-                    Id = videoGame.Id,
-                    Title = videoGame.Title,
-                    Platform = videoGame.Platform,
-                    Developer = videoGame.Developer,
-                    Publisher = videoGame.Publisher
+                    var videoGamesModel = new VideoGamesDTO
+                    {
+                        
+                        Title = videoGame.Title,
+                        Platform = videoGame.Platform,
+                        Developer = videoGame.Developer,
+                        Publisher = videoGame.Publisher
 
-                };
+                    };
 
-                videoGamesDTO.Add(videoGamesModel);
+                    videoGamesDTO.Add(videoGamesModel);
+                }
+                return Ok(videoGamesDTO);
             }
-            return Ok(videoGamesDTO);
+            catch (Exception ex) {
+                return StatusCode(500, new { message = "Internal error", error = ex.Message });
+            }
+          
+
         }
 
 
@@ -100,6 +108,8 @@ namespace VideoGame.Controllers
         }
 
     }
+
+   
     
 };
 
