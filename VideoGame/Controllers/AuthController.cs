@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using VideoGame.Data;
 using VideoGame.Models.Domain;
 using VideoGame.Models.DTOs;
 
@@ -8,18 +10,33 @@ namespace VideoGame.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController(VideoGameDb dbContext) : ControllerBase
+
     {
-        public static User user = new();
+        private readonly VideoGameDb _dbContext = dbContext;
 
-        [HttpPost]
-      public ActionResult<User> Register(UserDTO request)
+        //public static User user = new();
+
+        [HttpPost("Register")]
+      public async Task<ActionResult<User>>  Register(UserDTO request)
         {
-            var hashedPassword = new PasswordHasher<User>().HashPassword(user,request.Password); 
+            try 
+            {
+                if (request == null) return BadRequest(new {message = "Request can not be empty" });
+               var user = await _dbContext.Users.FirstOrDefaultAsync((x)=>x.UserName == request.UserName);
+                if (user != null) return BadRequest(new { message = "User already exist" });
+                var hashedPassword = new PasswordHasher<User>().HashPassword(user, request.Password);
 
-            user.UserName = request.UserName;   
-            user.PasswordHashed = hashedPassword;
-            return Ok(user);
+                user.UserName = request.UserName;
+                user.PasswordHashed = hashedPassword;
+             
+            }
+            catch(Exception ex)
+            {
+
+            }
+
+            return Ok();
         }
 
     }
