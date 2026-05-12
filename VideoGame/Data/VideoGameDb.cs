@@ -6,5 +6,6 @@ namespace VideoGame.Data
     public class VideoGameDb(DbContextOptions options) : DbContext( options)
     {
         public DbSet<VideoGames> VideoGames { get; set; }
+        public DbSet<User> Users { get; set; }  
     }
 }

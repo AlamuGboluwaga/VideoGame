@@ -23,4 +23,12 @@ namespace VideoGame.Controllers
         }
 
     }
+
+
+    //[HttpPost("login")]
+    //public ActionResult<User> Login([FromBody] UserDTO reques)
+    //{
+    //    //var verify = new PasswordHasher<User>().VerifyHashedPassword(user); 
+    //    return Ok(new {message = "Login Successfull"});
+    //}
 }
