@@ -18,7 +18,7 @@ namespace VideoGame.Controllers
 
       
         [HttpGet("VideoGames")]
-        public async Task< IActionResult> GetAllVideoGames()
+        public async Task< ActionResult<VideoGamesDTO>> GetAllVideoGames()
         {
             try
             {
