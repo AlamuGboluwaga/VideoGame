@@ -1,6 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using VideoGame.Data;
+using FluentValidation;
 
 namespace VideoGame
 {
@@ -18,6 +19,8 @@ namespace VideoGame
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<VideoGameDb>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly, includeInternalTypes:true);
 
             var app = builder.Build();
 

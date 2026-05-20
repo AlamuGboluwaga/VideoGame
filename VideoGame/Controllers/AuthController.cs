@@ -6,15 +6,19 @@ using Microsoft.VisualBasic;
 using VideoGame.Data;
 using VideoGame.Models.Domain;
 using VideoGame.Models.DTOs;
+using VideoGame.Validator;
+using FluentValidation;
+
 
 namespace VideoGame.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController(VideoGameDb dbContext) : ControllerBase
+    public class AuthController(VideoGameDb dbContext, IValidator<UserDTO> validator) : ControllerBase
 
     {
         private readonly VideoGameDb _dbContext = dbContext;
+        private readonly IValidator<UserDTO> _validator = validator;
 
         [HttpGet("users")]
 
@@ -68,7 +72,14 @@ namespace VideoGame.Controllers
         {
             try
             {
-                if (request == null) return BadRequest(new { message = "Request can not be empty" });
+                if (request == null ) return BadRequest(new { message = "Request can not be empty" });
+
+                var validationResult = await _validator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                {
+                    return BadRequest(validationResult.ToDictionary());
+                }
+
                 var user = await _dbContext.Users.FirstOrDefaultAsync((x) => x.UserName == request.UserName);
                 if (user != null) return BadRequest(new { message = "User already exist" });
                 var hashedPassword = new PasswordHasher<User>().HashPassword(user, request.Password);
@@ -77,7 +88,7 @@ namespace VideoGame.Controllers
                     PasswordHashed = hashedPassword,
                 };
                 _dbContext.Users.Add(newUser);
-                _dbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync();
 
                 return CreatedAtAction(nameof(GetUserById), new {id= newUser.Id}, newUser);
             }
@@ -88,11 +99,18 @@ namespace VideoGame.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<ActionResult<User>> Login([FromBody] LoginDTO  request)
+        public async Task<ActionResult<User>> Login([FromBody] UserDTO request)
 
         {
             try {
+               
                 if (request == null) return BadRequest(new { Message = "Request can not be empty" });
+                var verificationResult = await _validator.ValidateAsync(request);
+                if (!verificationResult.IsValid)
+                {
+                    return BadRequest(verificationResult.ToDictionary());
+                }
+
                 var user = await _dbContext.Users.FirstOrDefaultAsync((x) => x.UserName == request.UserName);
                 if (user == null) return NotFound(new { Message = "Invalid username or password" });
 
