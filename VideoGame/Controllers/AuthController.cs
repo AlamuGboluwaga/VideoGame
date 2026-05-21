@@ -8,6 +8,8 @@ using VideoGame.Models.Domain;
 using VideoGame.Models.DTOs;
 using VideoGame.Validator;
 using FluentValidation;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using VideoGame;
 
 
 namespace VideoGame.Controllers
@@ -26,7 +28,9 @@ namespace VideoGame.Controllers
         {
             try 
             {
-                var users= await _dbContext.Users.ToListAsync();
+              var skipNumber = (query.PageNuber - 1) * query.PageSize;
+
+                var users= await _dbContext.Users.Skip(skipNumber).Take().ToListAsync();
 
                 var userDto = new List<AllUsersDTO>();
 
@@ -41,6 +45,10 @@ namespace VideoGame.Controllers
                 }
 
                 Console.WriteLine(users.ToString());
+
+             
+
+
                 return Ok(userDto);
             }
             catch(Exception ex)
