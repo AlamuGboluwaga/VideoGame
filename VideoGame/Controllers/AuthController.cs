@@ -117,7 +117,7 @@ namespace VideoGame.Controllers
                 var verifyPassword = new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHashed, request.Password);
                 if (verifyPassword == PasswordVerificationResult.Failed) return BadRequest(new { Message = "Invalid username or password" });
 
-                return Ok(new { Message = "User Successfully logged in" });
+                return Ok(new { Message = "User successfully logged in" });
             }
             catch (Exception ex)
             {
