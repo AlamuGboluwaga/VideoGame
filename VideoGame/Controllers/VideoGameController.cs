@@ -4,9 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using VideoGame.Data;
 using VideoGame.Models.Domain;
 using VideoGame.Models.DTOs;
-using static System.Net.WebRequestMethods;
-using System.Text.Json;
-
 
 namespace VideoGame.Controllers
 {
@@ -126,6 +123,7 @@ namespace VideoGame.Controllers
         {
             return BadRequest("Failed to fetch data");
         }
+
 
         var data = await response.Content.ReadAsStringAsync();
 
