@@ -22,6 +22,21 @@ namespace VideoGame
 
             builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly, includeInternalTypes:true);
 
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReactApp",
+                    policy =>
+                    {
+                        policy.WithOrigins("http://localhost:5173") // Your React app's URL
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    });
+            });
+
+
+
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -32,6 +47,7 @@ namespace VideoGame
             }
 
             app.UseHttpsRedirection();
+            app.UseCors("AllowReactApp");
 
             app.UseAuthorization();
 

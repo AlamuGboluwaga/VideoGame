@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using VideoGame.Data;
 using VideoGame.Models.Domain;
 using VideoGame.Models.DTOs;
+using static System.Net.WebRequestMethods;
+using System.Text.Json;
 
 
 namespace VideoGame.Controllers
@@ -107,10 +109,31 @@ namespace VideoGame.Controllers
             return CreatedAtAction( nameof(GetVideoBtId), new { id = data.Id }, response) ;
         }
 
+
+
+  
+
+[HttpGet("GetAllData")]
+    public async Task<IActionResult> GetAllData()
+    {
+        using var httpClient = new HttpClient();
+
+        var url = "https://api.test.datacite.org/providers/caltech/dois?page[size]=100000";
+
+        var response = await httpClient.GetAsync(url);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return BadRequest("Failed to fetch data");
+        }
+
+        var data = await response.Content.ReadAsStringAsync();
+
+        return Ok(data);
     }
 
-   
-    
+}
+
 };
 
 //video.Title = request.Title;

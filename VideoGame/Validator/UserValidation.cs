@@ -12,15 +12,11 @@ namespace VideoGame.Validator
            .NotNull().WithMessage("null is not acceptable")
            .EmailAddress()
            .WithMessage("Invalid Format");
-
             RuleFor(x => x.Password)
            .Cascade(CascadeMode.Stop)
-            .NotEmpty().WithMessage("Password is required.")
-            .MinimumLength(3).WithMessage("Password must be at least 3 characters.")
-            .Matches("[A-Z]").WithMessage("Password must contain an uppercase letter.");
-            ;
-
+           .NotEmpty().WithMessage("Password is required.")
+           .MinimumLength(3).WithMessage("Password must be at least 3 characters.")
+           .Matches("[A-Z]").WithMessage("Password must contain an uppercase letter.");
         }
-     
-    }
+     }
 }
