@@ -109,26 +109,26 @@ namespace VideoGame.Controllers
         }
 
 
-[HttpGet("GetAllData")]
-    public async Task<IActionResult> GetAllData([FromQuery] PaginationFilter filter ,PaginationResponse paginationResponse)
-
-    {
-            // 1. Ensure the filter defaults are respected if none are passed
-        filter ??= new PaginationFilter();
-        var httpClient = _httpClientFactory.CreateClient();
-
-        var url = "https://api.test.datacite.org/providers/caltech/dois?page[size]=100000";
-
-        var response = await httpClient.GetAsync(url);
-
-        if (!response.IsSuccessStatusCode)
+        [HttpGet("GetAllData")]
+        public async Task<IActionResult> GetAllData([FromQuery] PaginationFilter filter)
         {
-            return BadRequest("Failed to fetch data from the external provider.");
-        }
+            // 1. Ensure the filter defaults are respected if none are passed
+            filter ??= new PaginationFilter();
 
+            var httpClient = _httpClientFactory.CreateClient();
 
-        var data = await response.Content.ReadAsStringAsync();
+            // 2. Inject the filter variables into the DataCite URL dynamically
+            var url = $"https://api.test.datacite.org/providers/caltech/dois?page[number]={filter.PageNumber}&page[size]={filter.PageSize}";
 
+            var response = await httpClient.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return BadRequest("Failed to fetch data from the external provider.");
+            }
+
+            // Fixed: Named it jsonString so the JSON parser can find it
+            var jsonString = await response.Content.ReadAsStringAsync();
 
             // 3. Extract the total records from DataCite's response metadata
             int totalRecords = 0;
@@ -140,15 +140,21 @@ namespace VideoGame.Controllers
                     totalRecords = total.GetInt32();
                 }
             }
-// 5. Return both the metadata and the actual payload
-        return Ok(new
-        {
-            Pagination = paginationResponse,
-            Data = JsonDocument.Parse(jsonString).RootElement.GetProperty("data") // Extracts the actual DOI list
-        });
-    }
 
-}
+            // 4. Instantiated PaginationResponse inside the method using the fetched total records
+            var paginationResponse = new PaginationResponse(filter.PageNumber, filter.PageSize, totalRecords);
+
+            // 5. Return both the metadata and the actual payload
+            return Ok(new
+            {
+                Pagination = paginationResponse,
+                Data = JsonDocument.Parse(jsonString).RootElement.GetProperty("data")
+            });
+        }
+
+
+
+    }
 
 };
 
