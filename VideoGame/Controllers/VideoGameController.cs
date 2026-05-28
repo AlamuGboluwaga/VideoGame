@@ -1,23 +1,27 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using VideoGame.Data;
 using VideoGame.Models.Domain;
 using VideoGame.Models.DTOs;
+using VideoGame.Pagination;
+
 
 namespace VideoGame.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
    
-    public class VideoGameController(VideoGameDb dbContext) : ControllerBase()
+    public class VideoGameController(VideoGameDb dbContext, IHttpClientFactory httpClientFactory) : ControllerBase()
     {
         private readonly VideoGameDb _dbContext = dbContext;
-      
+        private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+        private ReadOnlyMemory<byte> jsonString;
 
-      
+
         [HttpGet("VideoGames")]
-        public async Task< ActionResult<VideoGamesDTO>> GetAllVideoGames()
+       public async Task< ActionResult<VideoGamesDTO>> GetAllVideoGames()
         {
             try
             {
@@ -48,9 +52,8 @@ namespace VideoGame.Controllers
 
         }
 
-
-        [HttpGet("id")]
-        public async Task<IActionResult> GetVideoBtId(Guid id)
+       [HttpGet("id")]
+       public async Task<IActionResult> GetVideoBtId(Guid id)
         {
             try
             {
@@ -72,8 +75,7 @@ namespace VideoGame.Controllers
             }
         }
 
-
-        [HttpPost]
+       [HttpPost]
        public async Task< IActionResult> CreateVideoGame([FromBody] AddVideoGamesDTO request )
         {
             var  Id = Guid.NewGuid();
@@ -107,13 +109,13 @@ namespace VideoGame.Controllers
         }
 
 
-
-  
-
 [HttpGet("GetAllData")]
-    public async Task<IActionResult> GetAllData()
+    public async Task<IActionResult> GetAllData([FromQuery] PaginationFilter filter ,PaginationResponse paginationResponse)
+
     {
-        using var httpClient = new HttpClient();
+            // 1. Ensure the filter defaults are respected if none are passed
+        filter ??= new PaginationFilter();
+        var httpClient = _httpClientFactory.CreateClient();
 
         var url = "https://api.test.datacite.org/providers/caltech/dois?page[size]=100000";
 
@@ -121,21 +123,32 @@ namespace VideoGame.Controllers
 
         if (!response.IsSuccessStatusCode)
         {
-            return BadRequest("Failed to fetch data");
+            return BadRequest("Failed to fetch data from the external provider.");
         }
 
 
         var data = await response.Content.ReadAsStringAsync();
 
-        return Ok(data);
+
+            // 3. Extract the total records from DataCite's response metadata
+            int totalRecords = 0;
+            using (JsonDocument doc = JsonDocument.Parse(jsonString))
+            {
+                if (doc.RootElement.TryGetProperty("meta", out var meta) &&
+                    meta.TryGetProperty("total", out var total))
+                {
+                    totalRecords = total.GetInt32();
+                }
+            }
+// 5. Return both the metadata and the actual payload
+        return Ok(new
+        {
+            Pagination = paginationResponse,
+            Data = JsonDocument.Parse(jsonString).RootElement.GetProperty("data") // Extracts the actual DOI list
+        });
     }
 
 }
 
 };
 
-//video.Title = request.Title;
-//video.Platform = request.Platform;
-//video.Title = request.Platform;
-//video.Developer = request.Developer;
-//video.Publisher = request.Publisher;
