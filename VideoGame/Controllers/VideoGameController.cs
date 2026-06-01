@@ -148,7 +148,7 @@ namespace VideoGame.Controllers
             return Ok(new
             {
                 Pagination = paginationResponse,
-                Data = JsonDocument.Parse(jsonString).RootElement.GetProperty("data")
+                //Data = JsonDocument.Parse(jsonString).RootElement.GetProperty("data")
             });
         }
 

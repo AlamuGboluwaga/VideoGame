@@ -1,6 +1,6 @@
 ﻿namespace VideoGame.Pagination
 {
-    public class PaginationFilter(int pageNumber = 1, int pageSize = 10)
+    public record PaginationFilter(int pageNumber = 1, int pageSize = 10)
     {
         // Sanitize the inputs immediately using ternary expressions
     public int PageNumber { get; set; } = pageNumber < 1 ? 1 : pageNumber;

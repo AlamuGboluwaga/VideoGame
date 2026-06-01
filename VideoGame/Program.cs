@@ -1,4 +1,4 @@
-
+﻿
 using Microsoft.EntityFrameworkCore;
 using VideoGame.Data;
 using FluentValidation;
@@ -34,6 +34,9 @@ namespace VideoGame
                     });
             });
 
+
+            // 🟢 ADD THIS LINE TO FIX THE ERROR
+            builder.Services.AddHttpClient();
 
 
 
