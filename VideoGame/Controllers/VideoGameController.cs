@@ -26,10 +26,7 @@ namespace VideoGame.Controllers
             try
             {
                 var videoGames = await _dbContext.VideoGames.ToListAsync();
-                var totalCount = await _dbContext.VideoGames.CountAsync();
-
-
-
+               
                 var videoGamesDTO = new List<VideoGamesDTO>();
 
                 foreach (var videoGame in videoGames)
@@ -47,7 +44,7 @@ namespace VideoGame.Controllers
                     videoGamesDTO.Add(videoGamesModel);
                 }
 
-                Console.WriteLine( $"TOTAL COUNT ==> {totalCount}");
+              
                 return Ok(videoGamesDTO);
             }
             catch (Exception ex) {
@@ -148,7 +145,7 @@ namespace VideoGame.Controllers
 
             // 4. Instantiated PaginationResponse inside the method using the fetched total records
 
-           int totalRecords = await  ;
+           int totalRecords = await _dbContext.VideoGames.CountAsync();
             var paginationResponse = new PaginationResponse(filter.PageNumber, filter.PageSize, totalRecords);
 
             // 5. Return both the metadata and the actual payload
