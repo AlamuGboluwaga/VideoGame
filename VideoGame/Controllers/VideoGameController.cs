@@ -20,12 +20,15 @@ namespace VideoGame.Controllers
         private ReadOnlyMemory<byte> jsonString;
 
 
-        [HttpGet("VideoGames")]
+       [HttpGet("VideoGames")]
        public async Task< ActionResult<VideoGamesDTO>> GetAllVideoGames()
         {
             try
             {
                 var videoGames = await _dbContext.VideoGames.ToListAsync();
+                var totalCount = await _dbContext.VideoGames.CountAsync();
+
+
 
                 var videoGamesDTO = new List<VideoGamesDTO>();
 
@@ -43,6 +46,8 @@ namespace VideoGame.Controllers
 
                     videoGamesDTO.Add(videoGamesModel);
                 }
+
+                Console.WriteLine( $"TOTAL COUNT ==> {totalCount}");
                 return Ok(videoGamesDTO);
             }
             catch (Exception ex) {
@@ -109,8 +114,8 @@ namespace VideoGame.Controllers
         }
 
 
-        [HttpGet("GetAllData")]
-        public async Task<IActionResult> GetAllData([FromQuery] PaginationFilter filter)
+       [HttpGet("GetAllData")]
+       public async Task<IActionResult> GetAllData([FromQuery] PaginationFilter filter)
         {
             // 1. Ensure the filter defaults are respected if none are passed
             filter ??= new PaginationFilter();
@@ -131,24 +136,26 @@ namespace VideoGame.Controllers
             var jsonString = await response.Content.ReadAsStringAsync();
 
             // 3. Extract the total records from DataCite's response metadata
-            int totalRecords = 0;
-            using (JsonDocument doc = JsonDocument.Parse(jsonString))
-            {
-                if (doc.RootElement.TryGetProperty("meta", out var meta) &&
-                    meta.TryGetProperty("total", out var total))
-                {
-                    totalRecords = total.GetInt32();
-                }
-            }
+            //int totalRecords = 0;
+            //using (JsonDocument doc = JsonDocument.Parse(jsonString))
+            //{
+            //    if (doc.RootElement.TryGetProperty("meta", out var meta) &&
+            //        meta.TryGetProperty("total", out var total))
+            //    {
+            //        totalRecords = total.GetInt32();
+            //    }
+            //}
 
             // 4. Instantiated PaginationResponse inside the method using the fetched total records
+
+           int totalRecords = await  ;
             var paginationResponse = new PaginationResponse(filter.PageNumber, filter.PageSize, totalRecords);
 
             // 5. Return both the metadata and the actual payload
             return Ok(new
             {
                 Pagination = paginationResponse,
-                //Data = JsonDocument.Parse(jsonString).RootElement.GetProperty("data")
+                Data = JsonDocument.Parse(jsonString).RootElement.GetProperty("data")
             });
         }
 
