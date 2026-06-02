@@ -21,7 +21,7 @@ namespace VideoGame.Data
                 // 1. Only seed if the table is completely empty
                 if (!await context.Set<Product>().AnyAsync(cancellationToken))
                 {
-                    int totalRecords = 10000;
+                    int totalRecords = 100000;
                     int batchSize = 2000;
 
                     // 2. Configure Bogus fake data generator matching your schema
