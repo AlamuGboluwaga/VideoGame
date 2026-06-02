@@ -17,7 +17,9 @@ namespace VideoGame.Controllers
 
         {
             var products = await _dbContext.Products.ToListAsync();
-            return Ok(products);
+            var productsCount =await _dbContext.Products.CountAsync()  ;
+
+            return Ok(new {ProductsCount = productsCount ,Products = products });
         }
     }
 }
